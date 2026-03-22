@@ -817,6 +817,21 @@ class FormatConverter {
             if (toolsToAdd.length > 0) {
                 this.logger.info(`[Adapter] ⚠️ Force features enabled, injecting tools: [${toolsToAdd.join(", ")}]`);
             }
+
+            // When built-in tools are used with function calling, enable server-side tool invocations
+            // This is required by Gemini API to use built-in tools with function calling
+            const hasFunctionDeclarations = googleRequest.tools.some(
+                t => t.functionDeclarations && t.functionDeclarations.length > 0
+            );
+            if (hasFunctionDeclarations) {
+                if (!googleRequest.toolConfig) {
+                    googleRequest.toolConfig = {};
+                }
+                googleRequest.toolConfig.includeServerSideToolInvocations = true;
+                this.logger.info(
+                    "[Adapter] Enabled includeServerSideToolInvocations for built-in tools with function calling"
+                );
+            }
         }
 
         // Safety settings
