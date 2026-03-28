@@ -67,7 +67,7 @@ class BrowserManager {
         this._wsInitState = new Map();
 
         // Target URL for AI Studio app
-        this.targetUrl = "https://ai.studio/apps/0ca9e275-368c-4c54-9c0f-dd2cbef48aac";
+        this.targetUrl = "https://ai.studio/apps/f6a734a9-69aa-4709-ad30-045ab2c0f500";
 
         // Firefox/Camoufox does not use Chromium-style command line args.
         // We keep this empty; Camoufox has its own anti-fingerprinting optimizations built-in.
@@ -729,7 +729,7 @@ class BrowserManager {
 
         if (pageTitle.includes("Available regions") || pageTitle.includes("not available")) {
             throw new Error(
-                "🚨 Current IP does not support access to Google AI Studio (region restricted). Claw node may be identified as restricted region, try restarting container to get a new IP."
+                "🚨 The current IP does not support access to Google AI Studio. Please change the IP and restart!"
             );
         }
 
@@ -1961,7 +1961,18 @@ class BrowserManager {
                 }
 
                 if (msgText.includes("[ProxyClient]")) {
-                    this.logger.info(`[Context#${authIndex}] ${msgText.replace("[ProxyClient] ", "")}`);
+                    const forwardedMessage = `[Context#${authIndex}] ${msgText.replace("[ProxyClient] ", "")}`;
+                    const browserLogType = msg.type();
+
+                    if (browserLogType === "debug") {
+                        this.logger.debug(forwardedMessage);
+                    } else if (browserLogType === "warning") {
+                        this.logger.warn(forwardedMessage);
+                    } else if (browserLogType === "error") {
+                        this.logger.error(forwardedMessage);
+                    } else {
+                        this.logger.info(forwardedMessage);
+                    }
                 } else if (msg.type() === "error") {
                     this.logger.error(`[Context#${authIndex} Page Error] ${msgText}`);
                 }
